@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ car.brand }} {{ car.model }} - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" data-aos="fade-right">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+            <li class="breadcrumb-item active">{{ car.brand }} {{ car.model }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Car Images -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-lg" data-aos="fade-up">
+                <div class="position-relative">
+                    {% if car.image %}
+                        <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                    {% else %}
+                        {% if car.brand == 'BMW' %}
+                            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% elif car.brand == 'Toyota' %}
+                            <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% elif car.brand == 'Hyundai' %}
+                            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% elif car.brand == 'Mercedes-Benz' %}
+                            <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% elif car.brand == 'Audi' %}
+                            <img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% elif car.brand == 'Volkswagen' %}
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 400px; object-fit: cover;">
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                    <button class="favorite-btn" onclick="toggleFavorite({{ car.id }}, this)">
+                        <i class="{% if is_favorite %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                    {% endif %}
+                    
+                    {% if not car.available %}
+                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                         style="background: rgba(0,0,0,0.7);">
+                        <span class="badge bg-danger fs-4">Недоступен</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Additional Images -->
+            {% if car.image2 or car.image3 %}
+            <div class="row mt-3">
+                {% if car.image2 %}
+                <div class="col-6" data-aos="fade-up" data-aos-delay="100">
+                    <img src="{{ car.image2.url }}" class="img-fluid rounded shadow" alt="{{ car.name }}">
+                </div>
+                {% endif %}
+                {% if car.image3 %}
+                <div class="col-6" data-aos="fade-up" data-aos-delay="200">
+                    <img src="{{ car.image3.url }}" class="img-fluid rounded shadow" alt="{{ car.name }}">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Car Info -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg sticky-top" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="h3 fw-bold mb-0">{{ car.brand }} {{ car.model }}</h1>
+                        {% if car.available %}
+                            <span class="badge bg-success">Доступен</span>
+                        {% else %}
+                            <span class="badge bg-danger">Недоступен</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-muted mb-3">{{ car.year }} год</p>
+                    
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rating me-2">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star{% if forloop.counter > car.rating %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted">({{ car.reviews_count }} отзывов)</span>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <div class="price-badge fs-4 mb-2">{{ car.price_per_day }} ₽/день</div>
+                        {% if car.price_per_hour %}
+                            <small class="text-muted">{{ car.price_per_hour }} ₽/час</small>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    {% if car.available %}
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'core:book_car' pk=car.pk %}" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-calendar-plus me-2"></i>Забронировать
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}?next={% url 'core:book_car' pk=car.pk %}" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Войти для бронирования
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <button class="btn btn-secondary w-100 mb-3" disabled>
+                            <i class="fas fa-ban me-2"></i>Недоступен
+                        </button>
+                    {% endif %}
+                    
+                    <!-- Quick Contact -->
+                    <div class="text-center">
+                        <small class="text-muted d-block mb-2">Нужна помощь?</small>
+                        <a href="tel:+79991234567" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-phone me-1"></i>+7 (999) 123-45-67
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Details Tabs -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg" data-aos="fade-up">
+                <div class="card-body p-0">
+                    <ul class="nav nav-tabs nav-fill" id="carTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button">
+                                <i class="fas fa-info-circle me-2"></i>Описание
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button">
+                                <i class="fas fa-cogs me-2"></i>Характеристики
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button">
+                                <i class="fas fa-star me-2"></i>Особенности
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
+                                <i class="fas fa-comments me-2"></i>Отзывы ({{ reviews.count }})
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content p-4" id="carTabsContent">
+                        <!-- Description Tab -->
+                        <div class="tab-pane fade show active" id="description" role="tabpanel">
+                            <h5 class="mb-3">О автомобиле</h5>
+                            <p class="text-muted">{{ car.description|default:"Описание автомобиля будет добавлено позже." }}</p>
+                            
+                            {% if car.category %}
+                            <div class="mt-3">
+                                <span class="badge bg-light text-dark">{{ car.category.name }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Specifications Tab -->
+                        <div class="tab-pane fade" id="specs" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            <strong>Год:</strong> {{ car.year }}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-gas-pump text-primary me-2"></i>
+                                            <strong>Топливо:</strong> {{ car.get_fuel_type_display }}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-cogs text-primary me-2"></i>
+                                            <strong>КПП:</strong> {{ car.get_transmission_display }}
+                                        </li>
+                                        {% if car.engine_volume %}
+                                        <li class="mb-2">
+                                            <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                                            <strong>Объем двигателя:</strong> {{ car.engine_volume }}л
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-users text-primary me-2"></i>
+                                            <strong>Мест:</strong> {{ car.seats }}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-door-open text-primary me-2"></i>
+                                            <strong>Дверей:</strong> {{ car.doors }}
+                                        </li>
+                                        {% if car.power %}
+                                        <li class="mb-2">
+                                            <i class="fas fa-bolt text-primary me-2"></i>
+                                            <strong>Мощность:</strong> {{ car.power }} л.с.
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Features Tab -->
+                        <div class="tab-pane fade" id="features" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <i class="fas fa-snowflake text-{% if car.air_conditioning %}success{% else %}muted{% endif %} me-2"></i>
+                                        Кондиционер
+                                        {% if car.air_conditioning %}
+                                            <i class="fas fa-check text-success ms-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-muted ms-2"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-map-marker-alt text-{% if car.gps %}success{% else %}muted{% endif %} me-2"></i>
+                                        GPS навигация
+                                        {% if car.gps %}
+                                            <i class="fas fa-check text-success ms-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-muted ms-2"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fab fa-bluetooth text-{% if car.bluetooth %}success{% else %}muted{% endif %} me-2"></i>
+                                        Bluetooth
+                                        {% if car.bluetooth %}
+                                            <i class="fas fa-check text-success ms-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-muted ms-2"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <i class="fas fa-parking text-{% if car.parking_sensors %}success{% else %}muted{% endif %} me-2"></i>
+                                        Парктроник
+                                        {% if car.parking_sensors %}
+                                            <i class="fas fa-check text-success ms-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-muted ms-2"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <i class="fas fa-video text-{% if car.reverse_camera %}success{% else %}muted{% endif %} me-2"></i>
+                                        Камера заднего вида
+                                        {% if car.reverse_camera %}
+                                            <i class="fas fa-check text-success ms-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-muted ms-2"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            {% if reviews %}
+                                {% for review in reviews %}
+                                <div class="mb-4 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+                                            <div class="rating small">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star{% if forloop.counter > review.rating %} text-muted{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+                                    </div>
+                                    <p class="text-muted mb-0">{{ review.comment }}</p>
+                                </div>
+                                {% endfor %}
+                                
+                                {% if user.is_authenticated %}
+                                <div class="text-center mt-4">
+                                    <a href="{% url 'core:add_review' car_pk=car.pk %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-plus me-2"></i>Добавить отзыв
+                                    </a>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Пока нет отзывов</h5>
+                                    <p class="text-muted">Станьте первым, кто оставит отзыв об этом автомобиле!</p>
+                                    {% if user.is_authenticated %}
+                                    <a href="{% url 'core:add_review' car_pk=car.pk %}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Добавить отзыв
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Cars -->
+    {% if similar_cars %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4" data-aos="fade-up">
+                <i class="fas fa-car me-2 text-primary"></i>Похожие автомобили
+            </h3>
+            <div class="row">
+                {% for similar_car in similar_cars %}
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                    <div class="card h-100">
+                        <div class="position-relative">
+                            {% if similar_car.image %}
+                                <img src="{{ similar_car.image.url }}" class="card-img-top" alt="{{ similar_car.name }}">
+                            {% else %}
+                                {% if similar_car.brand == 'BMW' %}
+                                    <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% elif similar_car.brand == 'Toyota' %}
+                                    <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% elif similar_car.brand == 'Hyundai' %}
+                                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% elif similar_car.brand == 'Mercedes-Benz' %}
+                                    <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% elif similar_car.brand == 'Audi' %}
+                                    <img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% elif similar_car.brand == 'Volkswagen' %}
+                                    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                         class="card-img-top" alt="{{ similar_car.name }}">
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ similar_car.brand }} {{ similar_car.model }}</h6>
+                            <p class="card-text text-muted small">{{ similar_car.year }} • {{ similar_car.get_fuel_type_display }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="price-badge small">{{ similar_car.price_per_day }} ₽/день</div>
+                                <a href="{% url 'core:car_detail' pk=similar_car.pk slug=similar_car.slug %}" class="btn btn-outline-primary btn-sm">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

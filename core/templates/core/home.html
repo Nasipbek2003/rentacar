@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}RentaCar - Аренда автомобилей премиум класса{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Аренда автомобилей
+                        <span class="d-block">премиум класса</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Выберите идеальный автомобиль из нашего широкого парка. 
+                        Современные машины, выгодные цены, быстрое оформление.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#cars" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Выбрать авто
+                        </a>
+                        <a href="#features" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-info-circle me-2"></i>Узнать больше
+                        </a>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="row mt-5">
+                        <div class="col-4 text-center">
+                            <div class="h3 fw-bold text-primary mb-1">{{ total_cars }}+</div>
+                            <small class="text-muted">Автомобилей</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="h3 fw-bold text-primary mb-1">5000+</div>
+                            <small class="text-muted">Довольных клиентов</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="h3 fw-bold text-primary mb-1">24/7</div>
+                            <small class="text-muted">Поддержка</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="position-relative">
+                    <!-- Hero Image -->
+                    <div class="hero-image-container">
+                        <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Luxury Car" class="img-fluid rounded-4 shadow-lg">
+                    </div>
+                    
+                    <!-- Floating Elements -->
+                    <div class="floating-element position-absolute" style="top: 20%; left: -10%; z-index: -1;">
+                        <div class="bg-primary rounded-circle opacity-10" style="width: 100px; height: 100px;"></div>
+                    </div>
+                    <div class="floating-element position-absolute" style="bottom: 20%; right: -10%; z-index: -1;">
+                        <div class="bg-secondary rounded-circle opacity-10" style="width: 80px; height: 80px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search & Filter Section -->
+<section class="py-5 bg-light" id="search">
+    <div class="container">
+        <div class="search-form" data-aos="fade-up">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-filter me-2 text-primary"></i>Найти идеальный автомобиль
+            </h3>
+            
+            <form method="get" class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    {{ form.search }}
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    {{ form.brand }}
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    {{ form.fuel_type }}
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    {{ form.transmission }}
+                </div>
+                <div class="col-md-6 col-lg-1">
+                    {{ form.seats }}
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Найти
+                    </button>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="col-md-6 col-lg-3">
+                    {{ form.min_price }}
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    {{ form.max_price }}
+                </div>
+                
+                <!-- Sort Options -->
+                <div class="col-md-12 col-lg-6">
+                    <select name="sort" class="form-select">
+                        <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Сначала новые</option>
+                        <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Сначала дешевые</option>
+                        <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Сначала дорогие</option>
+                        <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>По рейтингу</option>
+                        <option value="year" {% if current_sort == 'year' %}selected{% endif %}>По году выпуска</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Cars Section -->
+{% if featured_cars %}
+<section class="py-5" id="featured">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="display-5 fw-bold mb-3">
+                <i class="fas fa-star text-warning me-2"></i>Рекомендуемые автомобили
+            </h2>
+            <p class="lead text-muted">Самые популярные модели с высоким рейтингом</p>
+        </div>
+        
+        <div class="row">
+            {% for car in featured_cars %}
+            <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        {% if car.image %}
+                            <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.name }}">
+                        {% else %}
+                            {% if car.brand == 'BMW' %}
+                                <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Toyota' %}
+                                <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Hyundai' %}
+                                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Mercedes-Benz' %}
+                                <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Audi' %}
+                                <img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Volkswagen' %}
+                                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                        <button class="favorite-btn" onclick="toggleFavorite({{ car.id }}, this)">
+                            <i class="{% if car.id in user_favorites %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-success">Топ выбор</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                        <p class="card-text text-muted small mb-2">{{ car.year }} • {{ car.get_fuel_type_display }} • {{ car.get_transmission_display }}</p>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="rating me-2">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star{% if forloop.counter > car.rating %} text-muted{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ car.reviews_count }} отзывов)</small>
+                        </div>
+                        
+                        <p class="card-text">{{ car.description|truncatewords:15 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="price-badge">{{ car.price_per_day }} ₽/день</div>
+                            <div>
+                                <a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}" class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'core:book_car' pk=car.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Cars Grid Section -->
+<section class="py-5 bg-light" id="cars">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up">
+            <h2 class="h3 mb-0">
+                <i class="fas fa-car me-2 text-primary"></i>Все автомобили
+                <small class="text-muted">({{ page_obj.paginator.count }} найдено)</small>
+            </h2>
+        </div>
+        
+        {% if page_obj %}
+        <div class="row">
+            {% for car in page_obj %}
+            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:50 }}">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        {% if car.image %}
+                            <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.name }}">
+                        {% else %}
+                            {% if car.brand == 'BMW' %}
+                                <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Toyota' %}
+                                <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Hyundai' %}
+                                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Mercedes-Benz' %}
+                                <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Audi' %}
+                                <img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% elif car.brand == 'Volkswagen' %}
+                                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                     class="card-img-top" alt="{{ car.name }}">
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if user.is_authenticated %}
+                        <button class="favorite-btn" onclick="toggleFavorite({{ car.id }}, this)">
+                            <i class="{% if car.id in user_favorites %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                        {% endif %}
+                        
+                        {% if not car.available %}
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                             style="background: rgba(0,0,0,0.7); border-radius: 20px 20px 0 0;">
+                            <span class="badge bg-danger fs-6">Недоступен</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                        <p class="card-text text-muted small mb-2">
+                            {{ car.year }} • {{ car.get_fuel_type_display }} • {{ car.get_transmission_display }} • {{ car.seats }} мест
+                        </p>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="rating me-2">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star{% if forloop.counter > car.rating %} text-muted{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ car.reviews_count }})</small>
+                        </div>
+                        
+                        <!-- Features -->
+                        <div class="mb-3">
+                            {% if car.air_conditioning %}<span class="badge bg-light text-dark me-1"><i class="fas fa-snowflake"></i></span>{% endif %}
+                            {% if car.gps %}<span class="badge bg-light text-dark me-1"><i class="fas fa-map-marker-alt"></i></span>{% endif %}
+                            {% if car.bluetooth %}<span class="badge bg-light text-dark me-1"><i class="fab fa-bluetooth"></i></span>{% endif %}
+                            {% if car.parking_sensors %}<span class="badge bg-light text-dark me-1"><i class="fas fa-parking"></i></span>{% endif %}
+                        </div>
+                        
+                        <p class="card-text">{{ car.description|truncatewords:12 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <div class="price-badge">{{ car.price_per_day }} ₽/день</div>
+                            <div>
+                                <a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}" 
+                                   class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if car.available %}
+                                <a href="{% url 'core:book_car' pk=car.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </a>
+                                {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Pagination" class="mt-4" data-aos="fade-up">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5" data-aos="fade-up">
+            <div class="mb-4">
+                <i class="fas fa-search fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">Автомобили не найдены</h3>
+            <p class="text-muted mb-4">Попробуйте изменить параметры поиска или сбросьте фильтры</p>
+            <a href="{% url 'core:home' %}" class="btn btn-primary">
+                <i class="fas fa-redo me-2"></i>Сбросить фильтры
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5" id="features">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="display-5 fw-bold mb-3">Почему выбирают нас?</h2>
+            <p class="lead text-muted">Мы предоставляем лучший сервис аренды автомобилей</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                    </div>
+                    <h4>Надежность</h4>
+                    <p class="text-muted">Все автомобили проходят регулярное техническое обслуживание и страхование</p>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-clock fa-3x text-primary"></i>
+                    </div>
+                    <h4>Быстрое оформление</h4>
+                    <p class="text-muted">Забронируйте автомобиль онлайн за несколько минут</p>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-headset fa-3x text-primary"></i>
+                    </div>
+                    <h4>Поддержка 24/7</h4>
+                    <p class="text-muted">Наша команда всегда готова помочь вам в любое время</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit search form on sort change
+    document.querySelector('select[name="sort"]').addEventListener('change', function() {
+        this.closest('form').submit();
+    });
+    
+    // Smooth scroll to cars section after search
+    {% if request.GET %}
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('cars').scrollIntoView({ behavior: 'smooth' });
+    });
+    {% endif %}
+</script>
+{% endblock %}
