@@ -267,8 +267,16 @@ def profile(request):
     
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        
+        # Обновляем основные данные пользователя
+        user = request.user
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.email = request.POST.get('email', user.email)
+        
         if form.is_valid():
             form.save()
+            user.save()
             messages.success(request, 'Профиль успешно обновлен!')
             return redirect('core:profile')
     else:

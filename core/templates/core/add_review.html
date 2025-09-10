@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Добавить отзыв - {{ car.brand }} {{ car.model }} - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" data-aos="fade-right">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}">{{ car.brand }} {{ car.model }}</a></li>
+            <li class="breadcrumb-item active">Отзыв</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg" data-aos="fade-up">
+                <div class="card-header bg-white border-0 p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" class="img-fluid rounded shadow" alt="{{ car.name }}" style="height: 80px; object-fit: cover;">
+                            {% else %}
+                                {% if car.brand == 'BMW' %}
+                                    <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" 
+                                         class="img-fluid rounded shadow" alt="{{ car.name }}" style="height: 80px; object-fit: cover;">
+                                {% elif car.brand == 'Toyota' %}
+                                    <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" 
+                                         class="img-fluid rounded shadow" alt="{{ car.name }}" style="height: 80px; object-fit: cover;">
+                                {% elif car.brand == 'Hyundai' %}
+                                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" 
+                                         class="img-fluid rounded shadow" alt="{{ car.name }}" style="height: 80px; object-fit: cover;">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" 
+                                         class="img-fluid rounded shadow" alt="{{ car.name }}" style="height: 80px; object-fit: cover;">
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h3 class="h4 mb-1">
+                                {% if existing_review %}
+                                    <i class="fas fa-edit text-warning me-2"></i>Редактировать отзыв
+                                {% else %}
+                                    <i class="fas fa-star text-primary me-2"></i>Добавить отзыв
+                                {% endif %}
+                            </h3>
+                            <p class="text-muted mb-0">{{ car.brand }} {{ car.model }} ({{ car.year }})</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="post" id="reviewForm">
+                        {% csrf_token %}
+                        
+                        <!-- Rating Section -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-star text-warning me-2"></i>Ваша оценка
+                            </label>
+                            <div class="rating-input mb-2">
+                                <div class="star-rating" id="starRating">
+                                    {% for i in "12345" %}
+                                        <i class="far fa-star" data-rating="{{ forloop.counter }}" onclick="setRating({{ forloop.counter }})"></i>
+                                    {% endfor %}
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    Нажмите на звезды, чтобы поставить оценку
+                                </small>
+                            </div>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="invalid-feedback d-block">{{ form.rating.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Comment Section -->
+                        <div class="mb-4">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment text-primary me-2"></i>{{ form.comment.label }}
+                            </label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="invalid-feedback d-block">{{ form.comment.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">
+                                Поделитесь своим опытом аренды этого автомобиля. Ваш отзыв поможет другим пользователям.
+                            </div>
+                        </div>
+                        
+                        <!-- Review Guidelines -->
+                        <div class="alert alert-info mb-4">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-lightbulb me-2"></i>Советы для написания хорошего отзыва:
+                            </h6>
+                            <ul class="mb-0">
+                                <li>Опишите состояние автомобиля</li>
+                                <li>Расскажите о качестве обслуживания</li>
+                                <li>Поделитесь впечатлениями от поездки</li>
+                                <li>Укажите плюсы и минусы (если есть)</li>
+                                <li>Порекомендуете ли вы этот автомобиль другим?</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                <i class="fas fa-paper-plane me-2"></i>
+                                {% if existing_review %}Обновить отзыв{% else %}Опубликовать отзыв{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Existing Review (if editing) -->
+    {% if existing_review %}
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="card border-warning" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-warning bg-opacity-10 border-warning">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history text-warning me-2"></i>Ваш текущий отзыв
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rating me-2">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star{% if forloop.counter > existing_review.rating %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ existing_review.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                    <p class="text-muted mb-0">{{ existing_review.comment }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .star-rating {
+        font-size: 2rem;
+        cursor: pointer;
+    }
+    
+    .star-rating i {
+        color: #ddd;
+        transition: color 0.2s ease;
+        margin-right: 0.2rem;
+    }
+    
+    .star-rating i:hover,
+    .star-rating i.active {
+        color: #ffc107;
+    }
+    
+    .star-rating i.active {
+        animation: starPulse 0.3s ease;
+    }
+    
+    @keyframes starPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentRating = {% if existing_review %}{{ existing_review.rating }}{% else %}0{% endif %};
+    
+    function setRating(rating) {
+        currentRating = rating;
+        document.getElementById('{{ form.rating.id_for_label }}').value = rating;
+        
+        // Update visual stars
+        const stars = document.querySelectorAll('#starRating i');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.remove('far');
+                star.classList.add('fas', 'active');
+            } else {
+                star.classList.remove('fas', 'active');
+                star.classList.add('far');
+            }
+        });
+        
+        // Enable submit button if rating is set
+        updateSubmitButton();
+    }
+    
+    function updateSubmitButton() {
+        const submitBtn = document.getElementById('submitBtn');
+        const comment = document.getElementById('{{ form.comment.id_for_label }}').value.trim();
+        
+        if (currentRating > 0 && comment.length > 10) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-outline-primary');
+            submitBtn.classList.add('btn-primary');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-outline-primary');
+        }
+    }
+    
+    // Initialize existing rating if editing
+    if (currentRating > 0) {
+        setRating(currentRating);
+    }
+    
+    // Comment validation
+    document.getElementById('{{ form.comment.id_for_label }}').addEventListener('input', function() {
+        updateSubmitButton();
+        
+        // Character counter
+        const maxLength = 1000;
+        const currentLength = this.value.length;
+        const remaining = maxLength - currentLength;
+        
+        // You can add character counter display here if needed
+    });
+    
+    // Hover effects for stars
+    document.querySelectorAll('#starRating i').forEach((star, index) => {
+        star.addEventListener('mouseenter', function() {
+            const rating = index + 1;
+            const stars = document.querySelectorAll('#starRating i');
+            stars.forEach((s, i) => {
+                if (i < rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = currentRating > i ? '#ffc107' : '#ddd';
+                }
+            });
+        });
+    });
+    
+    document.getElementById('starRating').addEventListener('mouseleave', function() {
+        // Reset to current rating
+        if (currentRating > 0) {
+            setRating(currentRating);
+        }
+    });
+    
+    // Form submission
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        if (currentRating === 0) {
+            e.preventDefault();
+            alert('Пожалуйста, поставьте оценку');
+            return false;
+        }
+        
+        const comment = document.getElementById('{{ form.comment.id_for_label }}').value.trim();
+        if (comment.length < 10) {
+            e.preventDefault();
+            alert('Комментарий должен содержать минимум 10 символов');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

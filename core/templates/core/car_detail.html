@@ -104,9 +104,9 @@
                     
                     <!-- Price -->
                     <div class="mb-4">
-                        <div class="price-badge fs-4 mb-2">{{ car.price_per_day }} ₽/день</div>
+                        <div class="price-badge fs-4 mb-2">{{ car.price_per_day }} сом/день</div>
                         {% if car.price_per_hour %}
-                            <small class="text-muted">{{ car.price_per_hour }} ₽/час</small>
+                            <small class="text-muted">{{ car.price_per_hour }} сом/час</small>
                         {% endif %}
                     </div>
                     
@@ -370,7 +370,7 @@
                             <h6 class="card-title">{{ similar_car.brand }} {{ similar_car.model }}</h6>
                             <p class="card-text text-muted small">{{ similar_car.year }} • {{ similar_car.get_fuel_type_display }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="price-badge small">{{ similar_car.price_per_day }} ₽/день</div>
+                                <div class="price-badge small">{{ similar_car.price_per_day }} сом/день</div>
                                 <a href="{% url 'core:car_detail' pk=similar_car.pk slug=similar_car.slug %}" class="btn btn-outline-primary btn-sm">
                                     Подробнее
                                 </a>

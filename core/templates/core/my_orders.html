@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мои заказы - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-right">
+        <h2 class="h3 mb-0">
+            <i class="fas fa-list text-primary me-2"></i>Мои заказы
+        </h2>
+        <a href="{% url 'core:home' %}" class="btn btn-outline-primary">
+            <i class="fas fa-plus me-2"></i>Новый заказ
+        </a>
+    </div>
+
+    {% if page_obj %}
+        <div class="row">
+            {% for order in page_obj %}
+            <div class="col-12 mb-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <!-- Car Image -->
+                            <div class="col-md-3">
+                                {% if order.car.image %}
+                                    <img src="{{ order.car.image.url }}" 
+                                         class="img-fluid rounded shadow" 
+                                         alt="{{ order.car.name }}"
+                                         style="height: 120px; object-fit: cover;">
+                                {% else %}
+                                    {% if order.car.brand == 'BMW' %}
+                                        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                                             class="img-fluid rounded shadow" alt="{{ order.car.name }}" style="height: 120px; object-fit: cover;">
+                                    {% elif order.car.brand == 'Toyota' %}
+                                        <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                                             class="img-fluid rounded shadow" alt="{{ order.car.name }}" style="height: 120px; object-fit: cover;">
+                                    {% elif order.car.brand == 'Hyundai' %}
+                                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                                             class="img-fluid rounded shadow" alt="{{ order.car.name }}" style="height: 120px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                                             class="img-fluid rounded shadow" alt="{{ order.car.name }}" style="height: 120px; object-fit: cover;">
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Order Info -->
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="mb-1">{{ order.car.brand }} {{ order.car.model }}</h5>
+                                    <span class="badge bg-{% if order.status == 'pending' %}warning{% elif order.status == 'confirmed' %}info{% elif order.status == 'active' %}success{% elif order.status == 'completed' %}secondary{% else %}danger{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                                
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-hashtag me-1"></i>Заказ #{{ order.id }}
+                                    <span class="ms-3">
+                                        <i class="fas fa-calendar me-1"></i>{{ order.created_at|date:"d.m.Y" }}
+                                    </span>
+                                </p>
+                                
+                                <div class="row text-sm">
+                                    <div class="col-6">
+                                        <p class="mb-1">
+                                            <i class="fas fa-play text-success me-1"></i>
+                                            <strong>Начало:</strong><br>
+                                            <small class="text-muted">{{ order.start_date|date:"d.m.Y H:i" }}</small>
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1">
+                                            <i class="fas fa-stop text-danger me-1"></i>
+                                            <strong>Окончание:</strong><br>
+                                            <small class="text-muted">{{ order.end_date|date:"d.m.Y H:i" }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {% if order.pickup_location %}
+                                <p class="mb-1">
+                                    <i class="fas fa-map-marker-alt text-primary me-1"></i>
+                                    <strong>Получение:</strong> {{ order.pickup_location }}
+                                </p>
+                                {% endif %}
+                                
+                                {% if order.return_location %}
+                                <p class="mb-0">
+                                    <i class="fas fa-map-marker-alt text-secondary me-1"></i>
+                                    <strong>Возврат:</strong> {{ order.return_location }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Price and Actions -->
+                            <div class="col-md-3 text-end">
+                                <div class="mb-3">
+                                    <div class="h4 text-primary mb-1">{{ order.total_price }} сом</div>
+                                    <small class="text-muted">{{ order.duration_days }} дн.</small>
+                                </div>
+                                
+                                <!-- Additional Services -->
+                                {% if order.child_seat or order.additional_driver or order.insurance %}
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">Дополнительно:</small>
+                                    {% if order.child_seat %}
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-baby"></i>
+                                        </span>
+                                    {% endif %}
+                                    {% if order.additional_driver %}
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-user-plus"></i>
+                                        </span>
+                                    {% endif %}
+                                    {% if order.insurance %}
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'core:car_detail' pk=order.car.pk slug=order.car.slug %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Подробнее
+                                    </a>
+                                    
+                                    {% if order.status == 'completed' %}
+                                        <a href="{% url 'core:add_review' car_pk=order.car.pk %}" 
+                                           class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-star me-1"></i>Отзыв
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if order.notes %}
+                        <hr class="my-3">
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-0">
+                                    <i class="fas fa-comment text-muted me-2"></i>
+                                    <strong>Комментарий:</strong> {{ order.notes }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Pagination" class="mt-4" data-aos="fade-up">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="text-center py-5" data-aos="fade-up">
+            <div class="mb-4">
+                <i class="fas fa-clipboard-list fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">У вас пока нет заказов</h3>
+            <p class="text-muted mb-4">Выберите автомобиль из нашего каталога и сделайте первый заказ!</p>
+            <a href="{% url 'core:home' %}" class="btn btn-primary">
+                <i class="fas fa-car me-2"></i>Выбрать автомобиль
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

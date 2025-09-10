@@ -71,19 +71,19 @@ class BookingForm(forms.ModelForm):
     child_seat = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Детское кресло (+500 руб/день)'
+        label='Детское кресло (+500 сом/день)'
     )
     
     additional_driver = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Дополнительный водитель (+300 руб/день)'
+        label='Дополнительный водитель (+300 сом/день)'
     )
     
     insurance = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Расширенная страховка (+800 руб/день)'
+        label='Расширенная страховка (+800 сом/день)'
     )
     
     class Meta:

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Заказ оформлен - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg" data-aos="fade-up">
+                <div class="card-body text-center p-5">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success"></i>
+                    </div>
+                    
+                    <h1 class="h3 fw-bold text-success mb-3">Заказ успешно оформлен!</h1>
+                    <p class="text-muted mb-4">
+                        Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения деталей аренды.
+                    </p>
+                    
+                    <!-- Order Details -->
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="fas fa-receipt text-primary me-2"></i>
+                                Детали заказа
+                            </h5>
+                            
+                            <div class="row text-start">
+                                <div class="col-md-6">
+                                    <p class="mb-2">
+                                        <strong>Номер заказа:</strong><br>
+                                        <span class="text-primary">#{{ order.id }}</span>
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Автомобиль:</strong><br>
+                                        {{ order.car.brand }} {{ order.car.model }} ({{ order.car.year }})
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Период аренды:</strong><br>
+                                        {{ order.start_date|date:"d.m.Y H:i" }} - {{ order.end_date|date:"d.m.Y H:i" }}
+                                        <small class="text-muted">({{ order.duration_days }} дн.)</small>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-2">
+                                        <strong>Место получения:</strong><br>
+                                        {{ order.pickup_location }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Место возврата:</strong><br>
+                                        {{ order.return_location }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Общая стоимость:</strong><br>
+                                        <span class="h4 text-success">{{ order.total_price }} сом</span>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Services -->
+                            {% if order.child_seat or order.additional_driver or order.insurance %}
+                            <hr class="my-3">
+                            <div class="text-start">
+                                <strong>Дополнительные услуги:</strong>
+                                <div class="mt-2">
+                                    {% if order.child_seat %}
+                                        <span class="badge bg-info me-2">
+                                            <i class="fas fa-baby me-1"></i>Детское кресло
+                                        </span>
+                                    {% endif %}
+                                    {% if order.additional_driver %}
+                                        <span class="badge bg-warning me-2">
+                                            <i class="fas fa-user-plus me-1"></i>Дополнительный водитель
+                                        </span>
+                                    {% endif %}
+                                    {% if order.insurance %}
+                                        <span class="badge bg-success me-2">
+                                            <i class="fas fa-shield-alt me-1"></i>Расширенная страховка
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if order.notes %}
+                            <hr class="my-3">
+                            <div class="text-start">
+                                <strong>Комментарий:</strong>
+                                <p class="text-muted mb-0">{{ order.notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>Что дальше?
+                        </h6>
+                        <p class="mb-2">
+                            Мы свяжемся с вами по телефону <strong>{{ order.phone }}</strong> 
+                            или email <strong>{{ order.email }}</strong> в течение 30 минут для подтверждения заказа.
+                        </p>
+                        <p class="mb-0">
+                            Пожалуйста, подготовьте водительское удостоверение и документ, удостоверяющий личность.
+                        </p>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>На главную
+                        </a>
+                        <a href="{% url 'core:my_orders' %}" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i>Мои заказы
+                        </a>
+                        <a href="{% url 'core:car_detail' pk=order.car.pk slug=order.car.slug %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-car me-2"></i>О автомобиле
+                        </a>
+                    </div>
+                    
+                    <!-- Support Info -->
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="text-muted small mb-0">
+                            <i class="fas fa-headset me-2"></i>
+                            Нужна помощь? Звоните: <a href="tel:+996999123456" class="text-decoration-none">+996 (999) 123-456</a>
+                            или пишите: <a href="mailto:support@rentacar.kg" class="text-decoration-none">support@rentacar.kg</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-redirect to orders page after 30 seconds (optional)
+    // setTimeout(function() {
+    //     window.location.href = "{% url 'core:my_orders' %}";
+    // }, 30000);
+    
+    // Confetti animation (optional)
+    document.addEventListener('DOMContentLoaded', function() {
+        // You can add confetti animation library here if desired
+        console.log('Order #{{ order.id }} created successfully!');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Бронирование {{ car.brand }} {{ car.model }} - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" data-aos="fade-right">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}">{{ car.brand }} {{ car.model }}</a></li>
+            <li class="breadcrumb-item active">Бронирование</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Car Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-lg sticky-top" data-aos="fade-right">
+                <div class="position-relative">
+                    {% if car.image %}
+                        <img src="{{ car.image.url }}" class="card-img-top" alt="{{ car.name }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                        {% if car.brand == 'BMW' %}
+                            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 250px; object-fit: cover;">
+                        {% elif car.brand == 'Toyota' %}
+                            <img src="https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 250px; object-fit: cover;">
+                        {% elif car.brand == 'Hyundai' %}
+                            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                                 class="card-img-top" alt="{{ car.name }}" style="height: 250px; object-fit: cover;">
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <h4 class="fw-bold mb-2">{{ car.brand }} {{ car.model }}</h4>
+                    <p class="text-muted mb-3">{{ car.year }} год</p>
+                    
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rating me-2">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star{% if forloop.counter > car.rating %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted">({{ car.reviews_count }})</span>
+                    </div>
+                    
+                    <!-- Specs -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-gas-pump me-1"></i>{{ car.get_fuel_type_display }} • 
+                            <i class="fas fa-cogs me-1"></i>{{ car.get_transmission_display }} • 
+                            <i class="fas fa-users me-1"></i>{{ car.seats }} мест
+                        </small>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="price-badge fs-4">{{ car.price_per_day }} сом/день</div>
+                        {% if car.price_per_hour %}
+                            <small class="text-muted d-block">{{ car.price_per_hour }} сом/час</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg" data-aos="fade-left">
+                <div class="card-header bg-white border-0 p-4">
+                    <h3 class="h4 mb-0">
+                        <i class="fas fa-calendar-plus text-primary me-2"></i>
+                        Забронировать автомобиль
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="post" id="bookingForm">
+                        {% csrf_token %}
+                        
+                        <!-- Rental Period -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-clock me-2"></i>Период аренды
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                    <i class="fas fa-play text-success me-2"></i>{{ form.start_date.label }}
+                                </label>
+                                {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.start_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                                    <i class="fas fa-stop text-danger me-2"></i>{{ form.end_date.label }}
+                                </label>
+                                {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.end_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Location -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Места получения и возврата
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.pickup_location.id_for_label }}" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-success me-2"></i>{{ form.pickup_location.label }}
+                                </label>
+                                {{ form.pickup_location }}
+                                {% if form.pickup_location.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.pickup_location.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.return_location.id_for_label }}" class="form-label">
+                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>{{ form.return_location.label }}
+                                </label>
+                                {{ form.return_location }}
+                                {% if form.return_location.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.return_location.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-address-book me-2"></i>Контактная информация
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                    <i class="fas fa-phone me-2"></i>{{ form.phone.label }}
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Services -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-plus-circle me-2"></i>Дополнительные услуги
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-check p-3 border rounded">
+                                    {{ form.child_seat }}
+                                    <label class="form-check-label" for="{{ form.child_seat.id_for_label }}">
+                                        <i class="fas fa-baby text-info me-2"></i>
+                                        <strong>{{ form.child_seat.label }}</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check p-3 border rounded">
+                                    {{ form.additional_driver }}
+                                    <label class="form-check-label" for="{{ form.additional_driver.id_for_label }}">
+                                        <i class="fas fa-user-plus text-warning me-2"></i>
+                                        <strong>{{ form.additional_driver.label }}</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check p-3 border rounded">
+                                    {{ form.insurance }}
+                                    <label class="form-check-label" for="{{ form.insurance.id_for_label }}">
+                                        <i class="fas fa-shield-alt text-success me-2"></i>
+                                        <strong>{{ form.insurance.label }}</strong>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Comments -->
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment me-2"></i>{{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Price Calculation -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-calculator text-primary me-2"></i>Расчет стоимости
+                                </h5>
+                                <div id="priceCalculation">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Базовая стоимость:</span>
+                                        <span id="basePrice">{{ car.price_per_day }} сом × <span id="days">1</span> дн.</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2" id="childSeatPrice" style="display: none !important;">
+                                        <span>Детское кресло:</span>
+                                        <span>500 сом × <span id="childSeatDays">1</span> дн.</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2" id="additionalDriverPrice" style="display: none !important;">
+                                        <span>Дополнительный водитель:</span>
+                                        <span>300 сом × <span id="additionalDriverDays">1</span> дн.</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2" id="insurancePrice" style="display: none !important;">
+                                        <span>Расширенная страховка:</span>
+                                        <span>800 сом × <span id="insuranceDays">1</span> дн.</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Итого:</strong>
+                                        <strong class="text-primary fs-5" id="totalPrice">{{ car.price_per_day }} сом</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'core:car_detail' pk=car.pk slug=car.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>Забронировать
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const carPricePerDay = {{ car.price_per_day }};
+    
+    function calculatePrice() {
+        const startDate = new Date(document.getElementById('{{ form.start_date.id_for_label }}').value);
+        const endDate = new Date(document.getElementById('{{ form.end_date.id_for_label }}').value);
+        
+        if (startDate && endDate && endDate > startDate) {
+            const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            let totalPrice = carPricePerDay * days;
+            
+            // Update days display
+            document.getElementById('days').textContent = days;
+            
+            // Additional services
+            const childSeat = document.getElementById('{{ form.child_seat.id_for_label }}').checked;
+            const additionalDriver = document.getElementById('{{ form.additional_driver.id_for_label }}').checked;
+            const insurance = document.getElementById('{{ form.insurance.id_for_label }}').checked;
+            
+            // Child seat
+            const childSeatDiv = document.getElementById('childSeatPrice');
+            if (childSeat) {
+                totalPrice += 500 * days;
+                document.getElementById('childSeatDays').textContent = days;
+                childSeatDiv.style.display = 'flex';
+            } else {
+                childSeatDiv.style.display = 'none';
+            }
+            
+            // Additional driver
+            const additionalDriverDiv = document.getElementById('additionalDriverPrice');
+            if (additionalDriver) {
+                totalPrice += 300 * days;
+                document.getElementById('additionalDriverDays').textContent = days;
+                additionalDriverDiv.style.display = 'flex';
+            } else {
+                additionalDriverDiv.style.display = 'none';
+            }
+            
+            // Insurance
+            const insuranceDiv = document.getElementById('insurancePrice');
+            if (insurance) {
+                totalPrice += 800 * days;
+                document.getElementById('insuranceDays').textContent = days;
+                insuranceDiv.style.display = 'flex';
+            } else {
+                insuranceDiv.style.display = 'none';
+            }
+            
+            document.getElementById('totalPrice').textContent = totalPrice.toLocaleString() + ' сом';
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('{{ form.start_date.id_for_label }}').addEventListener('change', calculatePrice);
+    document.getElementById('{{ form.end_date.id_for_label }}').addEventListener('change', calculatePrice);
+    document.getElementById('{{ form.child_seat.id_for_label }}').addEventListener('change', calculatePrice);
+    document.getElementById('{{ form.additional_driver.id_for_label }}').addEventListener('change', calculatePrice);
+    document.getElementById('{{ form.insurance.id_for_label }}').addEventListener('change', calculatePrice);
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().slice(0, 16);
+    document.getElementById('{{ form.start_date.id_for_label }}').min = today;
+    document.getElementById('{{ form.end_date.id_for_label }}').min = today;
+    
+    // Auto-fill return location when pickup location changes
+    document.getElementById('{{ form.pickup_location.id_for_label }}').addEventListener('blur', function() {
+        const returnLocation = document.getElementById('{{ form.return_location.id_for_label }}');
+        if (!returnLocation.value) {
+            returnLocation.value = this.value;
+        }
+    });
+</script>
+{% endblock %}

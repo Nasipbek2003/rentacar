@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мой профиль - RentaCar{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <!-- Profile Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-lg" data-aos="fade-right">
+                <div class="card-body text-center p-4">
+                    {% if user.userprofile.avatar %}
+                        <img src="{{ user.userprofile.avatar.url }}" 
+                             alt="Avatar" 
+                             class="rounded-circle mb-3 shadow" 
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 120px; height: 120px;">
+                            <i class="fas fa-user fa-3x text-white"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h4 class="fw-bold mb-1">
+                        {% if user.first_name and user.last_name %}
+                            {{ user.first_name }} {{ user.last_name }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-3">@{{ user.username }}</p>
+                    
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h4 fw-bold text-primary mb-1">{{ orders_count }}</div>
+                            <small class="text-muted">Заказов</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 fw-bold text-primary mb-1">{{ favorites_count }}</div>
+                            <small class="text-muted">Избранных</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 fw-bold text-primary mb-1">{{ reviews_count }}</div>
+                            <small class="text-muted">Отзывов</small>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:my_orders' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>Мои заказы
+                        </a>
+                        <a href="{% url 'core:my_favorites' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-heart me-2"></i>Избранное
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg" data-aos="fade-left">
+                <div class="card-header bg-white border-0 p-4">
+                    <h3 class="h4 mb-0">
+                        <i class="fas fa-user-edit text-primary me-2"></i>
+                        Редактировать профиль
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>Личная информация
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-user me-2"></i>Имя
+                                </label>
+                                <input type="text" class="form-control" 
+                                       value="{{ user.first_name }}" 
+                                       name="first_name" 
+                                       placeholder="Ваше имя">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-user me-2"></i>Фамилия
+                                </label>
+                                <input type="text" class="form-control" 
+                                       value="{{ user.last_name }}" 
+                                       name="last_name" 
+                                       placeholder="Ваша фамилия">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email
+                                </label>
+                                <input type="email" class="form-control" 
+                                       value="{{ user.email }}" 
+                                       name="email" 
+                                       placeholder="your@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                    <i class="fas fa-phone me-2"></i>{{ form.phone.label }}
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>{{ form.date_of_birth.label }}
+                                </label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.date_of_birth.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.driver_license.id_for_label }}" class="form-label">
+                                    <i class="fas fa-id-card me-2"></i>{{ form.driver_license.label }}
+                                </label>
+                                {{ form.driver_license }}
+                                {% if form.driver_license.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.driver_license.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Avatar Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-image me-2"></i>Аватар
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.avatar.id_for_label }}" class="form-label">
+                                <i class="fas fa-upload me-2"></i>{{ form.avatar.label }}
+                            </label>
+                            {{ form.avatar }}
+                            {% if form.avatar.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.avatar.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Рекомендуемый размер: 400x400px. Максимальный размер файла: 5MB.
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'core:home' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Security Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg" data-aos="fade-up">
+                <div class="card-header bg-white border-0 p-4">
+                    <h3 class="h4 mb-0">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                        Безопасность аккаунта
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-3 me-3">
+                                    <i class="fas fa-key text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Изменить пароль</h6>
+                                    <p class="text-muted small mb-0">Обновите пароль для повышения безопасности</p>
+                                </div>
+                                <div class="ms-auto">
+                                    <a href="{% url 'password_reset' %}" class="btn btn-outline-primary btn-sm">
+                                        Изменить
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-3 me-3">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Email подтвержден</h6>
+                                    <p class="text-muted small mb-0">{{ user.email }}</p>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Аккаунт создан: {{ user.date_joined|date:"d.m.Y" }}
+                        </p>
+                        <p class="text-muted small">
+                            Последний вход: {{ user.last_login|date:"d.m.Y H:i"|default:"Никогда" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview avatar before upload
+    document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // You can add preview functionality here if needed
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Auto-save form data in localStorage (optional)
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="date"]');
+    
+    inputs.forEach(input => {
+        // Load saved data
+        const savedValue = localStorage.getItem('profile_' + input.name);
+        if (savedValue && !input.value) {
+            input.value = savedValue;
+        }
+        
+        // Save data on input
+        input.addEventListener('input', function() {
+            localStorage.setItem('profile_' + input.name, input.value);
+        });
+    });
+    
+    // Clear localStorage on successful submit
+    form.addEventListener('submit', function() {
+        inputs.forEach(input => {
+            localStorage.removeItem('profile_' + input.name);
+        });
+    });
+</script>
+{% endblock %}
